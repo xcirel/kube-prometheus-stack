@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: staging
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 69.8.0
+    - repoURL: https://github.com/xcirel/kube-prometheus-stack.git
+      targetRevision: main
+      ref: values-ref
+      helm:
+        valueFiles:
+          - values-staging.yaml
+  destination:
+    server: https://976da9e3-5547-4ab4-9bb2-4bcabdbd8e66.us-mia-1-gw.linodelke.net:443
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true # Only sync out-of-sync resources, rather than applying every object in the application    
+    automated:
+      prune: true
+      selfHeal: true
+  revisionHistoryLimit: 10
